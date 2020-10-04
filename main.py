@@ -1,10 +1,10 @@
 from datetime import datetime, timedelta
 from typing import Optional
 
-from fastapi import Depends, FastAPI, HTTPException, status
+from fastapi import Depends, FastAPI, HTTPException, status, Form
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi.templating import Jinja2Templates
-from fastapi import Request
+from fastapi import Request, Response
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from pydantic import BaseModel
@@ -56,6 +56,17 @@ def find_all():
 
     return rows
 
+def insert(username: str, password: str, email: str, full_name: str):
+    conn = create_connection(database)
+
+    sql = ''' INSERT INTO users(username,full_name,email,hashed_password,disabled)
+              VALUES(?,?,?,?,?) '''
+
+    cur = conn.cursor()
+    cur.execute(sql, (username, full_name, email, password, 0, ))
+    conn.commit()
+    return cur.lastrowid
+
 def list_to_dict(users_list: list):
     users_dict = {}
 
@@ -70,10 +81,16 @@ def list_to_dict(users_list: list):
     #users_dict['create_access_token'] = {'name': 'luiz'}
     return users_dict
 
-fake_users_db = find_all()
-fake_users_db = list_to_dict(fake_users_db)
+fake_users_db = {}
 
-print(fake_users_db)
+def update_in_mamory_db():
+    global fake_users_db
+    fake_users_db = find_all()
+    fake_users_db = list_to_dict(fake_users_db)
+
+    print(fake_users_db)
+
+update_in_mamory_db()
 
 ############
 
@@ -111,6 +128,12 @@ def verify_password(plain_password, hashed_password):
 def get_password_hash(password):
     return pwd_context.hash(password)
 
+def insert_user(username: str, password: str, email: str, full_name: str):
+    try:
+        insert(username, get_password_hash(password), email, full_name)
+        update_in_mamory_db()
+    except Exception as e:
+        print(e)
 
 def get_user(db, username: str):
     if username in db:
@@ -206,3 +229,18 @@ async def register(request: Request):
     return templates.TemplateResponse(
         'register.html', {"request": request}
     )
+
+@app.post("/savenewuser", response_model=User, status_code=201)
+async def save_new_user(
+    response: Response,
+    username: str = Form(...),
+    password: str = Form(...),
+    email: str = Form(...),
+    full_name: str = Form(...)
+    ):
+
+    try:
+        insert_user(username, password, email, full_name)
+    except Exception as e:
+        response.status_code = status.HTTP_400_BAD_REQUEST
+        print(e)

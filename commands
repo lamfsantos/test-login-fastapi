@@ -2,7 +2,7 @@ pip3 install python-multipart
 
 pip3 install python-jose[cryptography]
 
-pip install passlib[bcrypt]
+pip3 install passlib[bcrypt]
 
 uvicorn main:app --reload
 
@@ -16,7 +16,7 @@ uvicorn main:app --reload
 }
 
 
-
+getCookie("access_token")
 
 
 
