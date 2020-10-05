@@ -1,58 +1,8 @@
-pip3 install python-multipart
+#To install the dependencies, run:
+pipenv install
 
-pip3 install python-jose[cryptography]
+#To run the project:
+pipenv shell
 
-pip3 install passlib[bcrypt]
-
+#then:
 uvicorn main:app --reload
-
-
-
-
-
-{
-    "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJqb2huZG9lIiwiZXhwIjoxNjAxNTY1OTA5fQ.MrO2hLFlia6YF1eO5E0Y0cCHSbfjQnzoPkzOTBzoRJk",
-    "token_type": "bearer"
-}
-
-
-getCookie("access_token")
-
-
-
-
-
-
-
-
-
-$("#submit").click(function(){
-  var username = $("#username").val()
-  var password = $("#password").val()
-
-  var formBody = [];
-  var encodedKey = encodeURIComponent("username")
-  var encodedValue = encodeURIComponent(username);
-  formBody.push(encodedKey + "=" + encodedValue);
-
-  encodedKey = encodeURIComponent("password")
-  encodedValue = encodeURIComponent(password);
-  formBody.push(encodedKey + "=" + encodedValue);
-
-  formBody = formBody.join("&");
-
-  console.log(formBody.toString())
-
-  fetch("/token", {
-    method: "POST",
-    headers: {
-      "Content-Type": "aplication/application/x-www-form-urlencoded"
-    },
-    body: formBody
-  })
-  .then(res => {
-    console.log('aaaaaaaaaa')
-    console.log(res)
-    console.log(res.toString)
-  })
-})
